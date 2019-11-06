@@ -1,0 +1,13 @@
+note over browser:
+user enters a note and clicks submit
+end note
+
+note over browser:
+note gets added to the array and input field is cleared
+end note
+
+note over browser:
+note list is redrawn
+end note
+
+browser->server: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note

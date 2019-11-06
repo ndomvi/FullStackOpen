@@ -1,0 +1,10 @@
+note over browser:
+user enters text in the field
+and clicks the submit button
+end note
+
+browser->server: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note
+
+note over browser:
+page is reloaded
+end note
