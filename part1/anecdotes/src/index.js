@@ -3,18 +3,45 @@ import ReactDOM from 'react-dom'
 
 const Anecdote = ({ text }) => <div>{text}</div>
 
-const App = ({ anecdotes }) => {
-  const [selected, setSelected] = useState('')
+const MostVoted = ({ votes, anecdotes }) => {
+  const maxVotes = Math.max(...votes)
+  const index = votes.findIndex(votes => votes === maxVotes)
+
   return (
     <>
-      <Anecdote text={selected} />
+      <h1>Most voted anecdote</h1>
+      <div>{anecdotes[index]}</div>
+      <div>Which has {maxVotes} votes</div>
+    </>
+  )
+}
+
+const App = ({ anecdotes }) => {
+  const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0))
+
+  return (
+    <>
+      <h1>A random anecdote</h1>
+      <Anecdote text={anecdotes[selected]} />
+      <div>Has {votes[selected]} votes</div>
       <button
         onClick={() => {
-          setSelected(anecdotes[Math.floor(Math.random() * anecdotes.length)])
+          const newVotes = [...votes]
+          newVotes[selected] += 1
+          setVotes(newVotes)
+        }}
+      >
+        Vote!
+      </button>
+      <button
+        onClick={() => {
+          setSelected(Math.floor(Math.random() * anecdotes.length))
         }}
       >
         Next anecdote
       </button>
+      <MostVoted votes={votes} anecdotes={anecdotes} />
     </>
   )
 }
