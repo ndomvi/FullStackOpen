@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
 const Stats = ({ feedback: { good, neutral, bad } }) => {
-  // We spread feedback from props and then spread it to individual numbers
+  // Spread 'feedback' from props and then spread it to individual numbers
   return good | neutral | bad ? (
     <div>
       <h1>Stats:</h1>
@@ -38,8 +38,8 @@ const App = () => {
       <div>
         <h1>Give feedback!</h1>
         <Button onClick={() => setFeedback({ ...feedback, good: feedback.good + 1 })} text='Good' />
-        <Button onClick={() => setFeedback({ ...feedback, neutral: feedback.neutral + 1 })} text={'Neutral'} />
-        <Button onClick={() => setFeedback({ ...feedback, bad: feedback.bad + 1 })} text={'Bad'} />
+        <Button onClick={() => setFeedback({ ...feedback, neutral: feedback.neutral + 1 })} text='Neutral' />
+        <Button onClick={() => setFeedback({ ...feedback, bad: feedback.bad + 1 })} text='Bad' />
       </div>
       <Stats feedback={feedback} />
     </>
