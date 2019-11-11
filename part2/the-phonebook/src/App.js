@@ -1,5 +1,6 @@
 /* global alert */
-import React, { useState } from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 
 const NewPersonForm = ({ newName, newNumber, addPerson, handleNameInputChange, handleNumberInputChange }) => (
   <form onSubmit={addPerson}>
@@ -23,12 +24,12 @@ const FilterField = ({ filterQuery, handleFilterQueryChange }) => (
   </div>
 )
 
-const PhonebookList = ({ persons, filterQuery }) => {
+const PhonebookList = ({ phonebook, filterQuery }) => {
   const filteredList = list => list.filter(person => person.name.toLowerCase().startsWith(filterQuery.toLowerCase()))
 
   return (
     <div>
-      {filteredList(persons).map(person => (
+      {filteredList(phonebook).map(person => (
         <p key={person.id}>
           {person.name} {person.number}
         </p>
@@ -38,20 +39,28 @@ const PhonebookList = ({ persons, filterQuery }) => {
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([{ id: 0, name: 'Arto Hellas' }])
+  const [phonebook, setPhonebook] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterQuery, setFilterQuery] = useState('')
 
+  // Fetch and set phonebook from server
+  const fetchPhonebook = () => {
+    axios.get('http://localhost:3001/persons').then(response => {
+      setPhonebook(response.data)
+    })
+  }
+  useEffect(fetchPhonebook, [])
+
   const addPerson = event => {
     event.preventDefault()
 
-    if (persons.some(person => person.name === newName)) {
+    if (phonebook.some(person => person.name === newName)) {
       alert(`${newName} is already in the phonebook!`)
     } else {
-      const newPerson = { id: persons[persons.length - 1].id + 1, name: newName, number: newNumber }
+      const newPerson = { id: phonebook[phonebook.length - 1].id + 1, name: newName, number: newNumber }
 
-      setPersons(persons.concat(newPerson))
+      setPhonebook(phonebook.concat(newPerson))
       setNewName('')
       setNewNumber('')
     }
@@ -74,7 +83,7 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <FilterField filterQuery={filterQuery} handleFilterQueryChange={handleFilterQueryChange} />
-      <PhonebookList persons={persons} filterQuery={filterQuery} />
+      <PhonebookList phonebook={phonebook} filterQuery={filterQuery} />
     </div>
   )
 }
