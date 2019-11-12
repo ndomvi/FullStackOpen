@@ -7,18 +7,31 @@ const SearchField = ({ searchQuery, handleSearchQueryChange }) => (
   </div>
 )
 
-const CountryInfo = ({ country: { name, flag, capital, population, region, subregion } }) => {
+const CountryInfo = ({ country: { name, nativeName, flag, capital, population, area, region, subregion } }) => (
+  <div>
+    <h1>
+      {name} ({nativeName})
+    </h1>
+    <img src={flag} alt={`Flag of ${name}`} style={{ width: '35vh', height: '25vh' }} />
+    <h2>Basic info</h2>
+    <h3>
+      {region} - {subregion}
+    </h3>
+    <p>Capital: {capital}</p>
+    <p>Area: {area} km²</p>
+    <p>Population: {population}</p>
+  </div>
+)
+
+const CountryListElement = ({ country }) => {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <div>
-      <h1>{name}</h1>
-      <img src={flag} alt={`Flag of ${name}`} style={{width: '35vh', height: '25vh'}}/>
-      <h2>Basic info</h2>
-      <h3>
-        {region} - {subregion}
-      </h3>
-      <p>Capital: {capital}</p>
-      <p>Population: {population}</p>
-    </div>
+    <li>
+      {country.name}
+      <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Hide' : 'Show more'}</button>
+      {isOpen ? <CountryInfo country={country} /> : null}
+    </li>
   )
 }
 
@@ -36,16 +49,18 @@ const CountryData = ({ countryData, searchQuery }) => {
       </div>
     )
   } else if (filteredCountryData.length > 1) {
-    // 1-10 countries
+    // 1-10 countries, show expandable list
     return (
       <div>
-        {filteredCountryData.map(country => (
-          <li key={country.alpha3Code}>{country.name}</li>
-        ))}
+        <ul>
+          {filteredCountryData.map(country => (
+            <CountryListElement country={country} key={country.alpha3Code} />
+          ))}
+        </ul>
       </div>
     )
   } else if (filteredCountryData.length === 1) {
-    // 1 country, maximal verbosity
+    // 1 country, show expanded element
     return <CountryInfo country={filteredCountryData[0]} />
   } else {
     return <div>No countries found! Try changing your filter!</div>
