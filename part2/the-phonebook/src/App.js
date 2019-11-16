@@ -1,6 +1,5 @@
-/* global alert */
-import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import phonebookService from './services/phonebook'
 
 const NewPersonForm = ({ newName, newNumber, addPerson, handleNameInputChange, handleNumberInputChange }) => (
   <form onSubmit={addPerson}>
@@ -24,17 +23,18 @@ const FilterField = ({ filterQuery, handleFilterQueryChange }) => (
   </div>
 )
 
-const PhonebookList = ({ phonebook, filterQuery }) => {
+const PhonebookList = ({ phonebook, filterQuery, removePerson }) => {
   const filteredList = list => list.filter(person => person.name.toLowerCase().startsWith(filterQuery.toLowerCase()))
 
   return (
-    <div>
+    <ul>
       {filteredList(phonebook).map(person => (
-        <p key={person.id}>
+        <li key={person.id}>
           {person.name} {person.number}
-        </p>
+          <button onClick={() => removePerson(person.id)}>Remove</button>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 
@@ -46,24 +46,40 @@ const App = () => {
 
   // Fetch and set phonebook from server
   const fetchPhonebook = () => {
-    axios.get('http://localhost:3001/persons').then(response => {
-      setPhonebook(response.data)
-    })
+    phonebookService.getPhonebook().then(phonebook => setPhonebook(phonebook))
   }
   useEffect(fetchPhonebook, [])
 
   const addPerson = event => {
     event.preventDefault()
 
-    if (phonebook.some(person => person.name === newName)) {
-      alert(`${newName} is already in the phonebook!`)
+    const duplicatePerson = phonebook.find(person => person.name === newName)
+    if (duplicatePerson) {
+      window.confirm(`${newName} is already in the phonebook!\nUpdate the number?`) &&
+        updatePerson(duplicatePerson.id, { ...duplicatePerson, number: newNumber })
     } else {
-      const newPerson = { id: phonebook[phonebook.length - 1].id + 1, name: newName, number: newNumber }
-
-      setPhonebook(phonebook.concat(newPerson))
-      setNewName('')
-      setNewNumber('')
+      const newPerson = {
+        id: phonebook[phonebook.length - 1].id + 1,
+        name: newName,
+        number: newNumber
+      }
+      phonebookService.addPerson(newPerson).then(addedPerson => {
+        setPhonebook(phonebook.concat(addedPerson))
+        setNewName('')
+        setNewNumber('')
+      })
     }
+  }
+
+  const removePerson = id => {
+    phonebookService.removePerson(id)
+    setPhonebook(phonebook.filter(person => person.id !== id))
+  }
+
+  const updatePerson = (id, updatedPerson) => {
+    phonebookService.updatePerson(id, updatedPerson).then(returnedPerson => {
+      setPhonebook(phonebook.map(person => (person.id !== id ? person : returnedPerson)))
+    })
   }
 
   const handleNameInputChange = event => setNewName(event.target.value)
@@ -83,7 +99,7 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <FilterField filterQuery={filterQuery} handleFilterQueryChange={handleFilterQueryChange} />
-      <PhonebookList phonebook={phonebook} filterQuery={filterQuery} />
+      <PhonebookList phonebook={phonebook} filterQuery={filterQuery} removePerson={removePerson} />
     </div>
   )
 }
