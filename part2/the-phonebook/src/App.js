@@ -10,7 +10,7 @@ const NewPersonForm = ({ newName, newNumber, addPerson, handleNameInputChange, h
       number: <input onChange={handleNumberInputChange} value={newNumber} />
     </div>
     <div>
-      <button type='submit' disabled={!(newName && newNumber)}>
+      <button type='submit' disabled={!(newName && newNumber) /* fields are not empty */}>
         add
       </button>
     </div>
@@ -29,7 +29,7 @@ const PhonebookList = ({ phonebook, filterQuery, removePerson }) => {
   return (
     <ul>
       {filteredList(phonebook).map(person => (
-        <li key={person.id}>
+        <li key={person.id} style={{ margin: '5px' }}>
           {person.name} {person.number}
           <button onClick={() => removePerson(person.id)}>Remove</button>
         </li>
@@ -38,11 +38,20 @@ const PhonebookList = ({ phonebook, filterQuery, removePerson }) => {
   )
 }
 
+const Notification = ({ notification }) => {
+  // if (!message) return null
+  // return <div className='error'>{message}</div>
+  return !(notification && notification.text) ? null : (
+    <div className={notification.error ? 'error' : 'success'}>{notification.text}</div>
+  )
+}
+
 const App = () => {
   const [phonebook, setPhonebook] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterQuery, setFilterQuery] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState({}) // { text, error }
 
   // Fetch and set phonebook from server
   const fetchPhonebook = () => {
@@ -50,13 +59,20 @@ const App = () => {
   }
   useEffect(fetchPhonebook, [])
 
+  const showNotification = (text, error = false, duration = 4500) => {
+    setNotificationMessage({ text, error })
+    setTimeout(() => {
+      setNotificationMessage(null)
+    }, duration)
+  }
+
   const addPerson = event => {
     event.preventDefault()
 
     const duplicatePerson = phonebook.find(person => person.name === newName)
     if (duplicatePerson) {
       window.confirm(`${newName} is already in the phonebook!\nUpdate the number?`) &&
-        updatePerson(duplicatePerson.id, { ...duplicatePerson, number: newNumber })
+        updatePerson({ ...duplicatePerson, number: newNumber })
     } else {
       const newPerson = {
         id: phonebook[phonebook.length - 1].id + 1,
@@ -64,6 +80,8 @@ const App = () => {
         number: newNumber
       }
       phonebookService.addPerson(newPerson).then(addedPerson => {
+        showNotification(`${addedPerson.name} was added to the phonebook!`)
+
         setPhonebook(phonebook.concat(addedPerson))
         setNewName('')
         setNewNumber('')
@@ -72,14 +90,23 @@ const App = () => {
   }
 
   const removePerson = id => {
-    phonebookService.removePerson(id)
+    phonebookService.removePerson(id).catch(() => {})
     setPhonebook(phonebook.filter(person => person.id !== id))
   }
 
-  const updatePerson = (id, updatedPerson) => {
-    phonebookService.updatePerson(id, updatedPerson).then(returnedPerson => {
-      setPhonebook(phonebook.map(person => (person.id !== id ? person : returnedPerson)))
-    })
+  const updatePerson = updatedPerson => {
+    phonebookService
+      .updatePerson(updatedPerson)
+      .then(returnedPerson => {
+        showNotification(`${returnedPerson.name} was updated!`)
+
+        // Update the returned person in the list
+        setPhonebook(phonebook.map(person => (person.id !== updatedPerson.id ? person : returnedPerson)))
+      })
+      .catch(() => {
+        showNotification(`${updatedPerson.name} has been removed from the server`, true)
+        setPhonebook(phonebook.filter(person => person.id !== updatedPerson.id))
+      })
   }
 
   const handleNameInputChange = event => setNewName(event.target.value)
@@ -89,6 +116,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification notification={notificationMessage} />
       <h2>Add a new person!</h2>
       <NewPersonForm
         newName={newName}
