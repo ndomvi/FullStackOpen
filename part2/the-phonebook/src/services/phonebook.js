@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const url = 'http://localhost:3001/persons'
+const url = '/api/persons'
 
 const getPhonebook = () => axios.get(url).then(response => response.data)
 const addPerson = person => axios.post(url, person).then(response => response.data)

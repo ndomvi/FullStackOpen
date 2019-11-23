@@ -74,24 +74,31 @@ const App = () => {
       window.confirm(`${newName} is already in the phonebook!\nUpdate the number?`) &&
         updatePerson({ ...duplicatePerson, number: newNumber })
     } else {
-      const newPerson = {
-        id: phonebook[phonebook.length - 1].id + 1,
-        name: newName,
-        number: newNumber
-      }
-      phonebookService.addPerson(newPerson).then(addedPerson => {
-        showNotification(`${addedPerson.name} was added to the phonebook!`)
+      const newPerson = { name: newName, number: newNumber }
+      phonebookService
+        .addPerson(newPerson)
+        .then(addedPerson => {
+          showNotification(`${addedPerson.name} was added to the phonebook!`)
 
-        setPhonebook(phonebook.concat(addedPerson))
-        setNewName('')
-        setNewNumber('')
-      })
+          setPhonebook(phonebook.concat(addedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(err => {
+          showNotification(err.response.data.error, true)
+        })
     }
   }
 
   const removePerson = id => {
-    phonebookService.removePerson(id).catch(() => {})
-    setPhonebook(phonebook.filter(person => person.id !== id))
+    phonebookService
+      .removePerson(id)
+      .then(() => {
+        setPhonebook(phonebook.filter(person => person.id !== id))
+      })
+      .catch(() => {
+        showNotification('Could not remove the person!', true)
+      })
   }
 
   const updatePerson = updatedPerson => {
