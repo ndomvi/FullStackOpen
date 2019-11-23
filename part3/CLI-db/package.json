@@ -1,0 +1,9 @@
+{
+  "name": "CLIdatabase",
+  "version": "1.0.0",
+  "main": "mongo.js",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "^5.7.12"
+  }
+}
