@@ -4,8 +4,10 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const config = require('./utils/config')
-const blogRouter = require('./controllers/blogs')
 const middleware = require('./utils/middleware')
+
+const blogRouter = require('./controllers/blogs')
+const userRouter = require('./controllers/users')
 
 const app = express()
 
@@ -24,5 +26,6 @@ app.use(bodyParser.json())
 if (process.env.NODE_ENV !== 'test') app.use(middleware.requestLogger)
 
 app.use('/api/blogs', blogRouter)
+app.use('/api/users', userRouter)
 
 module.exports = app

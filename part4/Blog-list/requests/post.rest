@@ -1,4 +1,4 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
-{ "title": "cool page", "author": "github", "url": "github.com", "likes": "155" }
+{ "title": "cool page", "author": "github", "url": "github.com", "likes": "155", "id": "5de555a8f8e56628309f2f31" }

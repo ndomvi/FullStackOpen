@@ -28,13 +28,14 @@ describe('GET', () => {
   })
 
   test('returns blogs correctly', async () => {
-    const res = await api.get('/api/blogs')
-    expect(res.body.length).toBe(helper.initialBlogs.length)
+    const blogs = await helper.getBlogs()
+    expect(blogs.length).toBe(helper.initialBlogs.length)
   })
 
   test('blogs have id field (not _id)', async () => {
-    const res = await api.get('/api/blogs')
-    expect(res.body[0].id).toBeDefined()
+    const blogs = await helper.getBlogs()
+    expect(blogs[0].id).toBeDefined()
+    expect(blogs[0]._id).not.toBeDefined()
   })
 })
 
@@ -48,10 +49,10 @@ describe('POST', () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-      const res = await api.get('/api/blogs')
-      expect(res.body.length).toBe(helper.initialBlogs.length + 1)
+      const blogs = await helper.getBlogs()
+      expect(blogs.length).toBe(helper.initialBlogs.length + 1)
       expect(
-        res.body.map(blog => {
+        blogs.map(blog => {
           delete blog.id
           return blog
         })
@@ -66,9 +67,9 @@ describe('POST', () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-      const res = await api.get('/api/blogs')
+      const blogs = await helper.getBlogs()
       expect(
-        res.body.map(blog => {
+        blogs.map(blog => {
           delete blog.id
           return blog
         })
@@ -106,13 +107,10 @@ describe('POST', () => {
 describe('PUT', () => {
   test('updates blog correctly', async () => {
     let res = await api.get('/api/blogs')
-    // console.log('BEFORE:', res.body)
     const updatedBlog = { ...res.body[0], likes: res.body[0].likes + 1337 }
-    console.log('UPDATED:', updatedBlog)
-    console.log(await api.put(`/api/blogs/${updatedBlog.id}`).send(updatedBlog))
+    await api.put(`/api/blogs/${updatedBlog.id}`).send(updatedBlog)
 
     res = await api.get('/api/blogs')
-    // console.log('AFTER:', res.body)
     expect(res.body.length).toBe(helper.initialBlogs.length)
     expect(res.body).toContainEqual(updatedBlog)
   })

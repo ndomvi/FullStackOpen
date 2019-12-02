@@ -1,3 +1,6 @@
+const Blog = require('../models/blog')
+const User = require('../models/user')
+
 const initialBlogs = [
   // ALL LINKS ARE RANDOM
   {
@@ -26,4 +29,16 @@ const initialBlogs = [
   }
 ]
 
-module.exports = { initialBlogs }
+const initialUsers = [{ username: 'testuser1', passwordHash: 'testpassword1' }]
+
+const getBlogs = async () => {
+  const list = await Blog.find({})
+  return list.map(blog => blog.toJSON())
+}
+
+const getUsers = async () => {
+  const list = await User.find({})
+  return list.map(user => user.toJSON())
+}
+
+module.exports = { initialBlogs, initialUsers, getBlogs, getUsers }
